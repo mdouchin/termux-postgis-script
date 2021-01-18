@@ -15,7 +15,7 @@ Be sure your Android device has a working internet connection. Then start Termux
 pkg -y update
 
 # Install wget
-pgg install wget
+pkg install wget
 
 # Get the script
 wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/liz.sh -O ~/liz.sh
@@ -55,6 +55,16 @@ Available commands: pe (permission), up (upgrade), in (install postgresql), pg (
 
 You can use the `./liz.sh` command to run some preconfigured functions:
 
+* `./liz/sh pe`: run termux-setup-storage
+* `./liz/sh up`: update termux packages
+* `./liz/sh in`: install PostgreSQL/PostGIS & create gis database and gis user
+* `./liz/sh pg`: start/stop/restart/status PostgreSQL service
+* `./liz/sh ip`: get Android device IP address
+* `./liz/sh bk`: backup the gis database
+* `./liz/sh re`: restore the gis database
+
+We recommand at first to run the commands `pe` then `up`. Afterward, you can install PostgreSQL with `in`
+
 ```bash
 # Add symbolic links to access your Android files
 # by running termux-setup-storage command line
@@ -76,8 +86,8 @@ You can use the `./liz.sh` command to run some preconfigured functions:
 ./liz.sh pg restart
 ./liz.sh pg status
 
-# Get IP addresses 
-# for WLAN (if WIFI is used) 
+# Get IP addresses
+# for WLAN (if WIFI is used)
 # and USB (if your share your Android 3/4/5G connection with your computer)
 ./liz.sh ip
 
@@ -117,18 +127,16 @@ psql service=geopoppy
 * remotely from your computer
 
   - get your Termux IP address in the local network
-
-```bash
-# Get your WIFI or USB IP address from the Termux session
-./liz.sh ip
-```
+  ```bash
+  # Get your WIFI or USB IP address from the Termux session
+  ./liz.sh ip
+  ```
   - Connect from your computer (which must be connected to the same network, for example by WIFI (or USB network sharing). For example, if your Termux IP is `192.168.1.130`:
+  ```bash
+  psql -h 192.168.1.130 -d gis -U gis
+  ```
 
-```bash
-psql -h 192.168.1.130 -d gis -U gis
-```
-
-**BEWARE**: 
+**BEWARE**:
 
 * The `$PREFIX/var/lib/postgresql/pg_hba.conf` is configured to allow **all connections from all user from anywhere**. Remove the last line if you want to change this default behaviour.
 * The `$PREFIX/var/lib/postgresql/postgresql.conf` is configured to give access to all IPs.  Remove the last line `listen_addresses = '*'` from this file to restrict access if needed.
