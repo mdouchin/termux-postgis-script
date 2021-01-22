@@ -13,6 +13,7 @@ Be sure your Android device has a working internet connection. Then start Termux
 ```bash
 # Update the packages
 pkg -y update
+pkg -y upgrade
 
 # Install wget
 pkg install wget
@@ -26,7 +27,7 @@ chmod +x ~/liz.sh
 # Test it
 ./liz.sh
 # should return the help like
-# Available commands: pe (permission), up (upgrade), in (install postgresql), pg (service postgresql), ip (get ip), bk (backup PostgreSQL) & re (restore PostgreSQL)
+# Available commands: pe (permission), up (upgrade), in (install postgresql), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)
 
 ```
 
@@ -55,15 +56,32 @@ Available commands: pe (permission), up (upgrade), in (install postgresql), pg (
 
 You can use the `./liz.sh` command to run some preconfigured functions:
 
-* `./liz/sh pe`: run termux-setup-storage
+* `./liz/sh pe`: run termux-setup-storage to allow acces to your documents (Download, DCIM, etc.)
 * `./liz/sh up`: update termux packages
-* `./liz/sh in`: install PostgreSQL/PostGIS & create gis database and gis user
+* `./liz/sh in`: install PostgreSQL/PostGIS & create gis database and gis user && install sshd
 * `./liz/sh pg`: start/stop/restart/status PostgreSQL service
 * `./liz/sh ip`: get Android device IP address
 * `./liz/sh bk`: backup the gis database
 * `./liz/sh re`: restore the gis database
+* `./liz/sh st`: restart PostgreSQL and the sshd services, to be used at device or session startup. It also shows the SSH username and the devices IP addresses
 
-We recommand at first to run the commands `pe` then `up`. Afterward, you can install PostgreSQL with `in`
+
+### Installation
+
+For your first use, we recommend to:
+
+* run the command `pe` to grant access to your documents
+* run the command then `up` to update the packages
+* run the command  `in` to install PostgreSQL and sshd. This can take a couple of minutes, and need you to follow the progress, since it asks for some confirmations.
+
+Of course, the installation process must be done only once.
+
+During the installation, you will be asked for:
+
+* the SSH user password, to connect with SSH from a computer
+* the PostgreSQL gis user password to be able to connect to the gis database
+
+Example commands:
 
 ```bash
 # Add symbolic links to access your Android files
@@ -78,6 +96,8 @@ We recommand at first to run the commands `pe` then `up`. Afterward, you can ins
 
 # Install PostgreSQL and PostGIS, and create a gis database and a gis user with gis password
 # Nothing will be done if PostgreSQL is already installed
+# Install also sshd, shows the user name and asks for a password
+# Nothing will be done if sshd is already installed
 ./liz.sh in
 
 # Start, stop, restart, get status for PostgreSQL server
@@ -99,7 +119,18 @@ We recommand at first to run the commands `pe` then `up`. Afterward, you can ins
 # and overwrite it with the previosly backuped data
 ./liz.sh re
 
+# Restart PostgreSQL and SSHD services
+# And display the SSH user and the IP addresses
+# This must not be necessary since this command is automatically run at startup
+# But you can call it anytime needed
+./liz/sh st
 ```
+
+### Startup
+
+The installation has added a script `~/.bash_profile` which will be **run automatically at startup**. This wil let you have a working PostgreSQL and sshd server after starting a new Termux session. No need to manually run the command `./liz.sh st`
+
+### Use PostgreSQL
 
 After installing PostgreSQL/PostGIS with the `./liz.sh in` command, you have a full PostgreSQL server with:
 
@@ -115,7 +146,7 @@ You now acces to your PostgreSQL database
 psql -d gis
 
 # with the gis user, connect to the database gis
-# this is recommanded
+# this is recommended
 psql -h localhost -d gis -U gis
 # password is gis
 
@@ -140,10 +171,21 @@ psql service=geopoppy
 
 * The `$PREFIX/var/lib/postgresql/pg_hba.conf` is configured to allow **all connections from all user from anywhere**. Remove the last line if you want to change this default behaviour.
 * The `$PREFIX/var/lib/postgresql/postgresql.conf` is configured to give access to all IPs.  Remove the last line `listen_addresses = '*'` from this file to restrict access if needed.
-* The password of the user `gis` can be changed by connecting as the superuser within termux with:
+* You can change the password of the user `gis` by connecting as the superuser within termux and run:
 
 ```bash
 psql -d gis -c "ALTER ROLE gis WITH PASSWORD 'new_password'"
 ```
 
 and do not forget to also change the password in the service file in `~/.pg_service.conf`
+
+### Use the SSH remote access
+
+You need to know you SSH user name, and the Termux IP address. To do so, run the commands `./liz.sh ip` from the Termux console, which will show your WIFI or USB IP address and your SSH user name
+
+Now you can connect from your computer, if it is connected in the same network, for example by WIFI. Let say that the SSH user name is `u0_a171` and your Termyx IP address is `192.168.1.29`, you can connect from your computer with:
+
+```bash
+ssh u0_a171@192.168.1.29 -p 8022
+```
+ and the password you setup during the first installation with `./liz.sh in`

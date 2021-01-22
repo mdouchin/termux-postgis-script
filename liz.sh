@@ -4,6 +4,63 @@
 COMMAND="$1"
 shift
 
+function liz_install_sshd() {
+  echo "SSHD - install and configure"
+
+  # Check it is not already installed
+  if [ -f $PREFIX/bin/sshd ]; then
+    echo "SSHD is already installed"
+  else
+    # Update
+    liz_update
+
+    # install openssh
+    pkg install -y openssh
+
+    # change config if needed
+    #
+    SCONFIG="$PREFIX/etc/ssh/sshd_config"
+    if grep -q 'MaxAuthTries' $SCONFIG; then
+        echo '* sshd config OK'
+    else
+        echo '* tuning sshd config'
+        echo "MaxAuthTries 10" >> $SCONFIG
+    fi
+
+    # set user password
+    ME=$(whoami)
+    echo "User: $ME"
+    echo -n "Please type a password for the user $ME: "
+    read -s password
+    echo -e "$password\n$password" | (passwd $ME)
+
+    # start sshd
+    sshd
+  fi
+}
+
+function liz_service_sshd() {
+  SERVICE="sshd"
+
+  # Stop if needed
+  if pgrep "$SERVICE" >/dev/null
+  then
+    echo "$SERVICE is running"
+    if [ "$1" = "stop" ] || [ "$1" = "restart" ]
+    then
+      echo "* Stop sshd"
+      pkill sshd
+    fi
+  fi
+
+  # Start if needed
+  if [ "$1" = "start" ] || [ "$1" = "restart" ]
+  then
+    echo "* Start sshd"
+    sshd
+  fi
+}
+
 function liz_storage() {
   echo "Storage - configure termux setup storage"
   termux-setup-storage
@@ -17,6 +74,18 @@ function liz_update() {
 }
 
 function liz_install_postgresql() {
+
+  echo "PostgreSQL - install and configure"
+
+  if [ -f $PREFIX/bin/pg_ctl ]; then
+    echo "* PostgreSQL - package already installed"
+    echo ""
+    exit
+  fi
+
+  # Update
+  liz_update
+
   echo "PostgreSQL - install needed packages"
   pkg install -y build-essential
   pkg install -y wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal
@@ -44,17 +113,22 @@ function liz_install_postgresql() {
   echo "PostgreSQL - create database gis"
   createdb gis
   psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;CREATE EXTENSION IF NOT EXISTS hstore;"
-  psql -d gis -c "CREATE ROLE gis WITH SUPERUSER LOGIN PASSWORD 'gis'"
+
+  echo "PostgreSQL - create the user 'gis'"
+  echo -n "Please type a password for the user gis: "
+  read -s PASSWORD
+  psql -d gis -c "CREATE ROLE gis WITH SUPERUSER LOGIN PASSWORD '$PASSWORD'"
 
   echo "PostgreSQL - create service file"
   cat > .pg_service.conf <<EOF
   [geopoppy]
   host=localhost
   dbname=gis
-  user=gis
+  user=gispassword
   port=5432
   password=gis
 EOF
+  sed -i "s/gispassword/$PASSWORD/"
 
   echo "PostgreSQL - restart server"
   pg_ctl -D $PREFIX/var/lib/postgresql restart
@@ -78,6 +152,13 @@ function liz_ip() {
   mydevice="rndis0"
   myip=$(ip add | grep "global $mydevice" | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
   echo "* IP ADDRESS USB = $myip"
+
+  # Show SSH username
+  ME=$(whoami)
+  echo "* Username for ssh: $ME"
+
+  # PostgreSQL info
+  echo "* PostgreSQL info - database gis, user gis"
 }
 
 function liz_backup() {
@@ -128,6 +209,47 @@ function liz_restore() {
   fi
 }
 
+function liz_add_startup_script() {
+  # Add startup script in bash_profile
+  BPROFILE=~/.bash_profile
+  if [ -f $BPROFILE ]; then
+    echo "* Startup .bash_profile is already installed"
+  else
+    echo "* Add startupt .bash_profile script"
+    echo "echo '######## LIZ ##########'" > $BPROFILE
+    echo "echo 'Welcome'" >> $BPROFILE
+    echo "~/liz.sh st" >> $BPROFILE
+    echo "echo '#######################'" >> $BPROFILE
+    echo "" >> $BPROFILE
+  fi
+}
+
+function liz_install() {
+
+  # Install PostgreSQL
+  liz_install_postgresql
+
+  # Install sshd
+  liz_install_sshd
+
+  # Add startup script
+  liz_add_startup_script
+}
+
+function liz_startup() {
+  # Start sshd
+  # Do not restart to avoid being kicked out any time you connect
+  liz_service_sshd start
+
+  # Start PostgreSQL server
+  liz_service_postgresql restart
+
+  # Show IP and username
+  liz_ip
+}
+
+
+
 case $COMMAND in
   pe)
     liz_storage
@@ -136,13 +258,7 @@ case $COMMAND in
     liz_update
     ;;
   in)
-     TEST=~/.pg_service.conf
-     if [ -f $TEST ]; then
-        echo "PostgreSQL - already installed"
-        exit
-     fi
-
-    liz_update && liz_install_postgresql
+    liz_install
     ;;
   pg)
     liz_service_postgresql $1
@@ -156,8 +272,11 @@ case $COMMAND in
   re)
     liz_restore
     ;;
+  st)
+    liz_startup
+    ;;
   *)
-    echo "Available commands: pe (permission), up (upgrade), in (install postgresql), pg (service postgresql), ip (get ip), bk (backup PostgreSQL) & re (restore PostgreSQL)"
+    echo "Available commands: pe (permission), up (upgrade), in (install postgresql), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)"
     exit 2
     ;;
 esac
