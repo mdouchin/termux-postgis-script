@@ -80,7 +80,7 @@ function liz_install_postgresql() {
   if [ -f $PREFIX/bin/pg_ctl ]; then
     echo "* PostgreSQL - package already installed"
     echo ""
-    exit
+    return
   fi
 
   # Update
