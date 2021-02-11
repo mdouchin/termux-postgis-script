@@ -11,8 +11,6 @@ function liz_install_sshd() {
   if [ -f $PREFIX/bin/sshd ]; then
     echo "SSHD is already installed"
   else
-    # Update
-    liz_update
 
     # install openssh
     pkg install -y openssh
@@ -71,6 +69,8 @@ function liz_update() {
   pkg update -y
   pkg upgrade -y
   pkg autoclean
+  echo ""
+  echo ""
 }
 
 function liz_install_postgresql() {
@@ -83,12 +83,8 @@ function liz_install_postgresql() {
     return
   fi
 
-  # Update
-  liz_update
-
   echo "PostgreSQL - install needed packages"
-  pkg install -y build-essential
-  pkg install -y wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal
+  pkg install -y build-essential wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal
 
   echo "PostgreSQL - install PostGIS"
   wget https://download.osgeo.org/postgis/source/postgis-3.1.0.tar.gz
@@ -233,7 +229,38 @@ function add_extra_keys() {
   echo "Install - Extra keys added to the terminal interface"
 }
 
+function liz_install_cron() {
+
+  # check if it is already installed
+  echo "Crontab - Install packages"
+  if [ -f $PREFIX/bin/crontab ]; then
+    echo "* Crontab - package already installed"
+    echo ""
+    return
+  fi
+
+  # Install packages
+  pkg install -y termux-services cronie
+  sv-enable crond
+
+  # Add crontab
+  echo "Crontab - Add test command in cron"
+  echo '* * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
+  crontab ~/crontab.txt
+  crontab -l
+
+}
+
+
+function liz_instal_lftp() {
+  echo "LFTP - Install package"
+  pkg install -y lftp
+}
+
 function liz_install() {
+
+  # Update packages
+  liz_update
 
   # Install PostgreSQL
   liz_install_postgresql
@@ -244,8 +271,14 @@ function liz_install() {
   # Add startup script
   liz_add_startup_script
 
+  # Install cron
+  liz_install_cron
+
   # Add terminal extra-keys
   add_extra_keys
+
+  # Add cron and daemons
+
 }
 
 function liz_startup() {
@@ -258,6 +291,9 @@ function liz_startup() {
 
   # Show IP and username
   liz_ip
+
+  # Acquire wakelock
+  termux-wake-lock
 }
 
 
