@@ -19,10 +19,15 @@ pkg -y upgrade
 pkg install wget
 
 # Get the script
-wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/liz.sh -O ~/liz.sh
+# you can use the long native URL
+cd
+wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/liz.sh -O liz.sh
+# or the short URL
+cd
+wget https://s.42l.fr/liz -O liz.sh
 
 # Add execute permission
-chmod +x ~/liz.sh
+chmod +x liz.sh
 
 # Test it
 ./liz.sh

@@ -224,6 +224,15 @@ function liz_add_startup_script() {
   fi
 }
 
+function add_extra_keys() {
+  EXTRAKEYS="extra-keys = [['ESC','/','-','HOME','UP','END','PGUP'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]"
+  PROPERTYFILE=~/.termux/termux.properties
+  echo "" >> $PROPERTYFILE
+  echo $EXTRAKEYS >> $PROPERTYFILE
+  termux-reload-settings
+  echo "Install - Extra keys added to the terminal interface"
+}
+
 function liz_install() {
 
   # Install PostgreSQL
@@ -234,6 +243,9 @@ function liz_install() {
 
   # Add startup script
   liz_add_startup_script
+
+  # Add terminal extra-keys
+  add_extra_keys
 }
 
 function liz_startup() {
