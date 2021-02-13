@@ -256,7 +256,10 @@ function liz_install_cron() {
 
   # Add crontab
   echo "Crontab - Add test command in cron"
-  echo '* * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
+  echo '*/5 * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
+  echo '*/5 * * * * /data/data/com.termux/files/home/lizsync_daemon.sh start' >> ~/crontab.txt
+  echo '*/5 * * * * /data/data/com.termux/files/home/lftp_daemon.sh start' >> ~/crontab.txt
+
   crontab ~/crontab.txt
   crontab -l
 
@@ -278,6 +281,9 @@ function liz_install() {
 
   # Install sshd
   liz_install_sshd
+
+  # Install lftp
+  liz_instal_lftp
 
   # Add startup script
   liz_add_startup_script
