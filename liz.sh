@@ -211,12 +211,23 @@ function liz_add_startup_script() {
   if [ -f $BPROFILE ]; then
     echo "* Startup .bash_profile is already installed"
   else
-    echo "* Add startupt .bash_profile script"
+    echo "* Add startup .bash_profile script"
     echo "echo '######## LIZ ##########'" > $BPROFILE
     echo "echo 'Welcome'" >> $BPROFILE
     echo "~/liz.sh st" >> $BPROFILE
     echo "echo '#######################'" >> $BPROFILE
     echo "" >> $BPROFILE
+  fi
+
+  # Add logout script
+  BLOGOUT=~/.bash_logout
+  if [ -f $BLOGOUT ]; then
+    echo "* Logout file .bash_logout is already installed"
+  else
+    echo "echo '######## LIZ ##########'" > $BLOGOUT
+    echo "echo 'Goodbye !'" > $BLOGOUT
+    echo "termux-wake-unlock" > $BLOGOUT
+    echo "echo '#######################'" >> $BLOGOUT
   fi
 }
 
