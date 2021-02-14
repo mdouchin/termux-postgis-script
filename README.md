@@ -12,17 +12,18 @@ Be sure your Android device has a working internet connection. Then start Termux
 
 ```bash
 # Update the packages
-pkg -y update
-pkg -y upgrade
+# BEWARE: you will need to answer with Y the questions
+pkg update
+pkg upgrade
 
 # Install wget
-pkg install wget
+pkg install -y wget
 
 # Get the script
 # you can use the long native URL
 cd
 wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/liz.sh -O liz.sh
-# or the short URL
+# or the short URL:
 cd
 wget https://s.42l.fr/liz -O liz.sh
 
@@ -97,6 +98,7 @@ Example commands:
 
 # Update packages
 # Run it frequently to keep your termux up-to-date
+# No need to run it if you just ran "pkg update" before
 ./liz.sh up
 
 # Install PostgreSQL and PostGIS, and create a gis database and a gis user with gis password
