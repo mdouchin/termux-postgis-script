@@ -117,14 +117,14 @@ function liz_install_postgresql() {
 
   echo "PostgreSQL - create service file"
   cat > .pg_service.conf <<EOF
-  [geopoppy]
+  [gis]
   host=localhost
   dbname=gis
   user=gispassword
   port=5432
   password=gis
 EOF
-  sed -i "s/gispassword/$PASSWORD/"
+  sed -i "s/gispassword/$PASSWORD/g"
 
   echo "PostgreSQL - restart server"
   pg_ctl -D $PREFIX/var/lib/postgresql restart
@@ -255,12 +255,20 @@ function liz_install_cron() {
   sv-enable crond
 
   # Add crontab
-  echo "Crontab - Add test command in cron"
-  echo '*/5 * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
-  echo '*/5 * * * * /data/data/com.termux/files/home/lizsync_daemon.sh start' >> ~/crontab.txt
-  echo '*/5 * * * * /data/data/com.termux/files/home/lftp_daemon.sh start' >> ~/crontab.txt
+  echo "Crontab - Get PostgreSQL and LFTP cron actions"
+  wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/cron_postgresql.sh -O cron_postgresql.sh
+  wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/cron_lftp.sh -O cron_lftp.sh
+  chmod +x cron_*.sh
+  echo "* PostgreSQL and LFTP actions installed"
 
+  # Activate crontab actions
+  echo "Crontab - Add cron actions"
+  echo '*/5 * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
+  echo '*/5 * * * * /data/data/com.termux/files/home/cron_postgresql.sh start' >> ~/crontab.txt
+  echo '*/5 * * * * /data/data/com.termux/files/home/cron_lftp.sh start' >> ~/crontab.txt
   crontab ~/crontab.txt
+  rm ~/crontab.txt
+  echo "* Crontab actions installed"
   crontab -l
 
 }
@@ -288,13 +296,11 @@ function liz_install() {
   # Add startup script
   liz_add_startup_script
 
-  # Install cron
-  liz_install_cron
-
   # Add terminal extra-keys
   add_extra_keys
 
   # Add cron and daemons
+  liz_install_cron
 
 }
 
