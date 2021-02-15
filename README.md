@@ -12,9 +12,9 @@ Be sure your Android device has a working internet connection. Then start Termux
 
 ```bash
 # Update the packages
-# BEWARE: you will need to answer with Y the questions
-pkg update
-pkg upgrade
+# BEWARE: you will need to answer with Y the questions asked during the upgrade job
+pkg update -y
+pkg upgrade -y
 
 # Install wget
 pkg install -y wget
@@ -76,9 +76,9 @@ You can use the `./liz.sh` command to run some preconfigured functions:
 
 For your first use, we recommend to:
 
-* run the command `pe` to grant access to your documents
+* run the command `pe` to grant access to your Android folders DCIM, Download, etc.
 * run the command then `up` to update the packages
-* run the command  `in` to install PostgreSQL and sshd. This can take a couple of minutes, and need you to follow the progress, since it asks for some confirmations.
+* run the command  `in` to install PostgreSQL and sshd. This can take a couple of minutes, and need you to follow the progress, since it asks for some confirmations. You can pass an optionnal argument with the desired password for the SSH and PostgreSQL user.
 
 Of course, the installation process must be done only once.
 
@@ -86,6 +86,8 @@ During the installation, you will be asked for:
 
 * the SSH user password, to connect with SSH from a computer
 * the PostgreSQL gis user password to be able to connect to the gis database
+
+only if you have not given the password at the end of the command. See example below.
 
 Example commands:
 
@@ -105,7 +107,10 @@ Example commands:
 # Nothing will be done if PostgreSQL is already installed
 # Install also sshd, shows the user name and asks for a password
 # Nothing will be done if sshd is already installed
+# Note: if you pass a password as argument, it will be used for the PostgreSQL and SSH user
 ./liz.sh in
+# With password given as parameter (you could use an environment variable or read from a file, etc
+./liz.sh in gis
 
 # Start, stop, restart, get status for PostgreSQL server
 ./liz.sh pg start
@@ -196,3 +201,9 @@ Now you can connect from your computer, if it is connected in the same network, 
 ssh u0_a171@192.168.1.29 -p 8022
 ```
  and the password you setup during the first installation with `./liz.sh in`
+
+### Crontab: run sunchronisation actions periodically
+
+The installation process has installed and configured **crontab**. Scripts will be run every 5 minutes and run synchronisation processes if needed INI configuration files are found.
+
+TODO: explain synchronisation scripts and configuration files

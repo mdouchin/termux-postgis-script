@@ -27,10 +27,20 @@ function liz_install_sshd() {
 
     # set user password
     ME=$(whoami)
+    echo "####################"
     echo "User: $ME"
-    echo -n "Please type a password for the user $ME: "
-    read -s password
-    echo -e "$password\n$password" | (passwd $ME)
+
+    GIVENPASS=$1
+    if [ ${#GIVENPASS} -gt 0 ]
+    then
+      PASSWORD=$GIVENPASS
+      echo "Password taken from the given parameter of liz_install"
+    else
+      echo "####################"
+      echo -n "Please type a password for the user $ME: "
+      read -s PASSWORD
+    fi
+    echo -e "$PASSWORD\n$PASSWORD" | (passwd $ME)
 
     # start sshd
     sshd
@@ -111,20 +121,28 @@ function liz_install_postgresql() {
   psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;CREATE EXTENSION IF NOT EXISTS hstore;"
 
   echo "PostgreSQL - create the user 'gis'"
-  echo -n "Please type a password for the user gis: "
-  read -s PASSWORD
+  GIVENPASS=$1
+  if [ ${#GIVENPASS} -gt 0 ]
+  then
+    PASSWORD=$GIVENPASS
+    echo "Password taken from the given parameter of liz_install"
+  else
+    echo "####################"
+    echo -n "Please type a password for the user gis: "
+    read -s PASSWORD
+  fi
   psql -d gis -c "CREATE ROLE gis WITH SUPERUSER LOGIN PASSWORD '$PASSWORD'"
 
   echo "PostgreSQL - create service file"
   cat > .pg_service.conf <<EOF
-  [gis]
-  host=localhost
-  dbname=gis
-  user=gispassword
-  port=5432
-  password=gis
+[gis]
+host=localhost
+dbname=gis
+user=gispassword
+port=5432
+password=gis
 EOF
-  sed -i "s/gispassword/$PASSWORD/g"
+  sed -i "s/gispassword/$PASSWORD/g" .pg_service.conf
 
   echo "PostgreSQL - restart server"
   pg_ctl -D $PREFIX/var/lib/postgresql restart
@@ -292,10 +310,10 @@ function liz_install() {
   liz_update
 
   # Install PostgreSQL
-  liz_install_postgresql
+  liz_install_postgresql $1
 
   # Install sshd
-  liz_install_sshd
+  liz_install_sshd $1
 
   # Install lftp
   liz_instal_lftp
