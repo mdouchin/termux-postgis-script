@@ -257,7 +257,9 @@ function liz_install_cron() {
   # Add crontab
   echo "Crontab - Get PostgreSQL and LFTP cron actions"
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/cron_postgresql.sh -O cron_postgresql.sh
+  wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/postgresql.ini -O postgresql.ini
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/cron_lftp.sh -O cron_lftp.sh
+  wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/lftp.ini -O lftp.ini
   chmod +x cron_*.sh
   echo "* PostgreSQL and LFTP actions installed"
 
@@ -277,6 +279,11 @@ function liz_install_cron() {
 function liz_instal_lftp() {
   echo "LFTP - Install package"
   pkg install -y lftp
+  if [ -f $PREFIX/bin/lftp ]; then
+    echo "* LFTP - package already installed"
+    echo ""
+    return
+  fi
 }
 
 function liz_install() {
