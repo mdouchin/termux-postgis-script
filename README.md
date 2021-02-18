@@ -37,6 +37,8 @@ chmod +x liz.sh
 
 ```
 
+![Installation screencast](media/20210215-172908.mp4)
+
 ### Manually
 
 * Go to the file URL: https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/liz.sh
