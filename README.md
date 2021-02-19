@@ -37,7 +37,7 @@ chmod +x liz.sh
 
 ```
 
-![Installation screencast](media/20210215-172908.mp4)
+![Get and install script](media/download_and_install_script.gif)
 
 ### Manually
 
