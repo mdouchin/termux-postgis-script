@@ -33,7 +33,7 @@ chmod +x liz.sh
 # Test it
 ./liz.sh
 # should return the help like
-# Available commands: pe (permission), up (upgrade), in (install postgresql), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)
+# Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)
 
 ```
 
@@ -57,7 +57,7 @@ chmod +x liz.sh
 # Test
 ./liz.sh
 # should return the help like
-Available commands: pe (permission), up (upgrade), in (install postgresql), pg (service postgresql), ip (get ip), bk (backup PostgreSQL) & re (restore PostgreSQL)
+Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL) & re (restore PostgreSQL)
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ You can use the `./liz.sh` command to run some preconfigured functions:
 
 * `./liz/sh pe`: run termux-setup-storage to allow acces to your documents (Download, DCIM, etc.)
 * `./liz/sh up`: update termux packages
-* `./liz/sh in`: install PostgreSQL/PostGIS & create gis database and gis user && install sshd
+* `./liz/sh in`: install PostgreSQL/PostGIS & create gis database and gis user && install sshd and other tools (lftp, crontab, etc.)
 * `./liz/sh pg`: start/stop/restart/status PostgreSQL service
 * `./liz/sh ip`: get Android device IP address
 * `./liz/sh bk`: backup the gis database
@@ -80,7 +80,7 @@ For your first use, we recommend to:
 
 * run the command `pe` to grant access to your Android folders DCIM, Download, etc.
 * run the command then `up` to update the packages
-* run the command  `in` to install PostgreSQL and sshd. This can take a couple of minutes, and need you to follow the progress, since it asks for some confirmations. You can pass an optionnal argument with the desired password for the SSH and PostgreSQL user.
+* run the command  `in` to install PostgreSQL, sshd and other tools such as lftp and crontab. This can take a couple of minutes, and need you to follow the progress, since it asks for some confirmations: confirm with **Y** You can pass an optionnal argument with the desired password for the SSH and PostgreSQL user.
 
 Of course, the installation process must be done only once.
 
@@ -111,7 +111,8 @@ Example commands:
 # Nothing will be done if sshd is already installed
 # Note: if you pass a password as argument, it will be used for the PostgreSQL and SSH user
 ./liz.sh in
-# With password given as parameter (you could use an environment variable or read from a file, etc
+# OR you can use the command
+# with a password given as parameter (you could use an environment variable or read from a file, etc
 ./liz.sh in gis
 
 # Start, stop, restart, get status for PostgreSQL server
@@ -130,10 +131,10 @@ Example commands:
 
 # Restore gis PostgreSQL database
 # BEWARE: this will erase your Android PostgresSQL gis database
-# and overwrite it with the previosly backuped data
+# and overwrite it with the previosly backuped data !!!
 ./liz.sh re
 
-# Restart PostgreSQL and SSHD services
+# Restart PostgreSQL
 # And display the SSH user and the IP addresses
 # This must not be necessary since this command is automatically run at startup
 # But you can call it anytime needed
@@ -206,6 +207,6 @@ ssh u0_a171@192.168.1.29 -p 8022
 
 ### Crontab: run sunchronisation actions periodically
 
-The installation process has installed and configured **crontab**. Scripts will be run every 5 minutes and run synchronisation processes if needed INI configuration files are found.
+The installation process has installed and configured **crontab**. Scripts will be run every 5 minutes and run synchronisation processes if the needed INI configuration files are found.
 
-TODO: explain synchronisation scripts and configuration files
+**TODO**: explain synchronisation scripts and configuration files

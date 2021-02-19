@@ -354,7 +354,7 @@ case $COMMAND in
     liz_update
     ;;
   in)
-    liz_install
+    liz_install $1
     ;;
   pg)
     liz_service_postgresql $1
@@ -372,7 +372,7 @@ case $COMMAND in
     liz_startup
     ;;
   *)
-    echo "Available commands: pe (permission), up (upgrade), in (install postgresql), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)"
+    echo "Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)"
     exit 2
     ;;
 esac
