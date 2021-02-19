@@ -283,13 +283,15 @@ function liz_install_cron() {
 
   # Activate crontab actions
   echo "Crontab - Add cron actions"
-  echo '*/5 * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
+  echo '* * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
   echo '*/5 * * * * /data/data/com.termux/files/home/cron_postgresql.sh start' >> ~/crontab.txt
   echo '*/5 * * * * /data/data/com.termux/files/home/cron_lftp.sh start' >> ~/crontab.txt
   crontab ~/crontab.txt
   rm ~/crontab.txt
   echo "* Crontab actions installed"
   crontab -l
+  sleep 1
+  sv-enable crond
 
 }
 
@@ -326,6 +328,8 @@ function liz_install() {
 
   # Add cron and daemons
   liz_install_cron
+
+  echo "########## INSTALLATION COMPLETED ###########"
 
 }
 
@@ -371,8 +375,11 @@ case $COMMAND in
   st)
     liz_startup
     ;;
+  ve)
+    echo "Version: 1.0.0"
+    ;;
   *)
-    echo "Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)"
+    echo "Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), st (Startup script), ve (version)"
     exit 2
     ;;
 esac

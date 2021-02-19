@@ -33,7 +33,7 @@ chmod +x liz.sh
 # Test it
 ./liz.sh
 # should return the help like
-# Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL) & st (Startup script)
+# Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), st (Startup script), ve (version)
 
 ```
 
@@ -57,7 +57,7 @@ chmod +x liz.sh
 # Test
 ./liz.sh
 # should return the help like
-Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL) & re (restore PostgreSQL)
+Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), ve (version)
 ```
 
 ## Usage
@@ -72,6 +72,7 @@ You can use the `./liz.sh` command to run some preconfigured functions:
 * `./liz/sh bk`: backup the gis database
 * `./liz/sh re`: restore the gis database
 * `./liz/sh st`: restart PostgreSQL and the sshd services, to be used at device or session startup. It also shows the SSH username and the devices IP addresses
+* `./liz.sh ve`: display the version of the script liz.sh
 
 
 ### Installation
@@ -205,8 +206,37 @@ ssh u0_a171@192.168.1.29 -p 8022
 ```
  and the password you setup during the first installation with `./liz.sh in`
 
-### Crontab: run sunchronisation actions periodically
+### Crontab: run actions periodically
 
-The installation process has installed and configured **crontab**. Scripts will be run every 5 minutes and run synchronisation processes if the needed INI configuration files are found.
+The installation process has installed and configured **crontab**. This tool is in charge of running some actions at regular intervals.
 
-**TODO**: explain synchronisation scripts and configuration files
+To check which actions are configured, you can execute
+
+```bash
+crontab -l
+```
+
+The result of this command will be like:
+
+```
+~ $ crontab -l
+* * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron
+*/5 * * * * /data/data/com.termux/files/home/cron_postgresql.sh start
+*/5 * * * * /data/data/com.termux/files/home/cron_lftp.sh start
+```
+
+The first line is a test action executed every minute which writes the current date into the file `~/test_cron`. You can check it works by running
+
+```bash
+ls -lh ~/test_cron
+```
+
+Two other scripts will be run every 5 minutes. They can be used to run some FTP and PostgreSQL database synchronisation processes if the needed INI configuration files are found.
+
+#### FTP synchronisation with lftp
+
+TODO
+
+#### PostgreSQL synchronisation with LizSync
+
+TODO
