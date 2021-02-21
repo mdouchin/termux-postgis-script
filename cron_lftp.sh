@@ -73,7 +73,7 @@ echo "set ssl:verify-certificate no" > $DIRECTORY/$CONFIGFTP
 echo "set sftp:auto-confirm yes" >> $DIRECTORY/$CONFIGFTP
 echo "set ftp:ssl-allow false" >> $DIRECTORY/$CONFIGFTP
 echo "open $FTPPROT://$FTPUSER@$FTPHOST" >> $DIRECTORY/$CONFIGFTP
-echo "mirror -R --verbose --use-cache -x data/ --ignore-time --delete-first $FTPLOCA $FTPREMO" >> $DIRECTORY/$CONFIGFTP
+echo "mirror -R --verbose --use-cache --ignore-time $FTPLOCA $FTPREMO" >> $DIRECTORY/$CONFIGFTP
 echo "quit" >> $DIRECTORY/$CONFIGFTP
 echo "bye" >> $DIRECTORY/$CONFIGFTP
 

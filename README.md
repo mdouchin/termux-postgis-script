@@ -235,8 +235,33 @@ Two other scripts will be run every 5 minutes. They can be used to run some FTP 
 
 #### FTP synchronisation with lftp
 
-TODO
+The script `/data/data/com.termux/files/home/cron_lftp.sh` is in charge of running the **synchronisation of files** between a file directory of your Android device and a FTP server directory. The library **lftp** is used in mirror mode for this purpose. The cron checks every 5 minutes if the content of a chosen folder has changed, and runs the synchronisation. Only new of modified files are uploaded. Not deletion is made on the server side.
+
+To enable it, you need to  edit the INI file `lftp.ini` and change the properties:
+
+```ìni
+[lftp]
+active=false
+protocol=ftp
+host=some-fake-ftp-domain.com
+port=21
+user=your_ftp_username
+local_dir=storage/downloads/qgis/media
+remote_dir=qgis/directory/media
+
+```
+
+* **active** If set to `true`, the synchronisation is activated. Use `false` to deactivate file synchronisation
+* **protocol** Use `ftp` or `sftp`, depending on your FTP server
+* **host** The domain name or IP address of the FTP server
+* **port** The port. Usually `21` for FTP and `22` for SFTP
+* **user** The FTP user which will logs in
+* **local_dir** The local directory of your Termux setup to synchronise. In the example above, all files and folders under your Android folder `Downloads/qgis/media` will be synchronized. The `storage/` root corresponds to your Android user folder, which usually contains DCIM, Downloads, Pictures, Videos
+* **remote_dir** The remote directory in your FTP server. Choose with care, as the synchronisation will modify its content
+
+The **password** needed to log in is not stored in this file, but needs to be written in the file `.netrc` of your Termux home folder. See the [netrc file documentation](https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html) for more information on the syntax.
 
 #### PostgreSQL synchronisation with LizSync
 
 TODO
+
