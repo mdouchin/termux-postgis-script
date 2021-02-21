@@ -278,7 +278,8 @@ function liz_install_cron() {
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/postgresql.ini -O postgresql.ini
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/cron_lftp.sh -O cron_lftp.sh
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/lftp.ini -O lftp.ini
-  chmod +x cron_*.sh
+  wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/run_daemon.sh -O run_daemon.sh
+  chmod +x *.sh
   echo "* PostgreSQL and LFTP actions installed"
 
   # Activate crontab actions
