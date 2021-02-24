@@ -24,6 +24,7 @@ pkg install -y wget
 cd
 wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/liz.sh -O liz.sh
 # or the short URL:
+# BEWARE: it is an lowercase L, not a 1 (one) after 42
 cd
 wget https://s.42l.fr/liz -O liz.sh
 
