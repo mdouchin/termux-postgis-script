@@ -350,6 +350,27 @@ function liz_startup() {
 }
 
 
+function liz_reset_all() {
+    WIPEOUT=false
+    read -p "Do you really want to reset all your Termux configuration ? This will erase all programs, configuration files and PostgreSQL database data. Your Android storage will NOT be deleted (y/n)" yn
+    case $yn in
+        [Yy]* ) WIPEOUT=true; break;;
+        [Nn]* ) echo "* Operation canceled: no reset has been done"; exit;;
+        * ) echo "Please answer y (yes) or n (no).";;
+    esac
+
+    if [ "$WIPEOUT" = true ]
+    then
+      echo "Reset all - Start deleting files and configuration"
+      liz_service_postgresql stop
+      termux-wake-unlock
+      crontab -r
+      rm -rf .bash_* .pg_service.conf cron_* *.ini *.sh test_cron .netrc .psql_history
+      termux-reset
+      echo "* Reset completed. Disconnecting..."
+      exit
+    fi
+}
 
 case $COMMAND in
   pe)
@@ -379,8 +400,11 @@ case $COMMAND in
   ve)
     echo "Version: 1.0.0"
     ;;
+  zz)
+    liz_reset_all
+    ;;
   *)
-    echo "Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), st (Startup script), ve (version)"
+    echo "Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), st (Startup script), ve (version), zz (reset all)"
     exit 2
     ;;
 esac

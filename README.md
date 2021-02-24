@@ -34,7 +34,7 @@ chmod +x liz.sh
 # Test it
 ./liz.sh
 # should return the help like
-# Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), st (Startup script), ve (version)
+# Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), st (Startup script), ve (version), zz (reset al)
 
 ```
 
@@ -58,7 +58,7 @@ chmod +x liz.sh
 # Test
 ./liz.sh
 # should return the help like
-Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), ve (version)
+Available commands: pe (permission), up (upgrade), in (install), pg (service postgresql), ip (get ip), bk (backup PostgreSQL), re (restore PostgreSQL), ve (version), zz (reset all)
 ```
 
 ## Usage
@@ -74,6 +74,7 @@ You can use the `./liz.sh` command to run some preconfigured functions:
 * `./liz/sh re`: restore the gis database
 * `./liz/sh st`: restart PostgreSQL and the sshd services, to be used at device or session startup. It also shows the SSH username and the devices IP addresses
 * `./liz.sh ve`: display the version of the script liz.sh
+* `./liz.sh zz`: reset all ! This will completely erase your termux installation, and delete configuration files and PostgreSQL database data. Your Android storage will NOT be deleted.
 
 
 ### Installation
