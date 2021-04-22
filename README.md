@@ -235,6 +235,14 @@ ls -lh ~/test_cron
 
 Two other scripts will be run every 5 minutes. They can be used to run some FTP and PostgreSQL database synchronisation processes if the needed INI configuration files are found.
 
+If no file `~/test_cron` exists, you can test to reactivate the cron service with 
+
+```bash
+sv-enable crond
+```
+
+NB: This command should be done on every start, since it is now included in the startup script.
+
 #### FTP synchronisation with lftp
 
 The script `/data/data/com.termux/files/home/cron_lftp.sh` is in charge of running the **synchronisation of files** between a file directory of your Android device and a FTP server directory. The library **lftp** is used in mirror mode for this purpose. The cron checks every 5 minutes if the content of a chosen folder has changed, and runs the synchronisation. Only new of modified files are uploaded. Not deletion is made on the server side.

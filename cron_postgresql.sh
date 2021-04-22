@@ -32,24 +32,12 @@ fi
 # Get PostgreSQL queries options from the ini file
 PGACTIVE=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*active[ \t]*=[ \t]*//p' $PGINI)
 PGCONNECTION=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*connection[ \t]*=[ \t]*//p' $PGINI)
-PGCHECK=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*check_action_needed[ \t]*=[ \t]*//p' $PGINI)
 PGACTION=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*run_action[ \t]*=[ \t]*//p' $PGINI)
 
 if [ "$PGACTIVE" != "true" ]
 then
     echo "Action is not active. Cancel."
     exit 0
-fi
-
-# Check audit table is not empty
-$DAEMON $PGCONNECTION -t -c "$PGCHECK" > sup
-CHECK=$(cat sup | sed 's/[^0-9]//g')
-rm sup
-
-# For actions other than start and restart
-if [ "$ACTION" != "start" ] && [ "$ACTION" != "restart" ]
-then
-    CHECK=1
 fi
 
 # config
@@ -59,12 +47,8 @@ echo "$PGACTION" > $DIRECTORY/$CONFIGPG
 DAEMON_OPTS="$PGCONNECTION -f $DIRECTORY/$CONFIGPG"
 
 # Run daemon
-if [ $CHECK > 0 ]
-then
-    echo "$NAME: $ACTION"
-    ./run_daemon.sh $ACTION $NAME $DAEMON "$DAEMON_OPTS"
-else
-    echo "Nothing to do"
-fi
+echo "$NAME: $ACTION"
+./run_daemon.sh $ACTION $NAME $DAEMON "$DAEMON_OPTS"
+
 
 exit 0

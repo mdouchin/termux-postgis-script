@@ -347,6 +347,9 @@ function liz_startup() {
 
   # Acquire wakelock
   termux-wake-lock
+
+  # Activate cron
+  sv-enable crond
 }
 
 
