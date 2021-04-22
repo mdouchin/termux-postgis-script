@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.0.3 - 22/04/2021
+
+* PostgreSQL sync - remove useless check before running lizsync synchronize command
+
 ### 1.0.2 - 24/02/2021
 
 * Add command `./liz.sh zz` to reset all Termux installed softwares, configuration files and PostgreSQL data
