@@ -114,7 +114,7 @@ function liz_install_postgresql() {
   echo "host all all 0.0.0.0/0 md5" >> $PREFIX/var/lib/postgresql/pg_hba.conf
 
   echo "PostgreSQL - start server"
-  pg_ctl -D $PREFIX/var/lib/postgresql start
+  liz_service_postgresql start
 
   echo "PostgreSQL - create database gis"
   createdb gis
@@ -145,7 +145,7 @@ EOF
   sed -i "s/gispassword/$PASSWORD/g" .pg_service.conf
 
   echo "PostgreSQL - restart server"
-  pg_ctl -D $PREFIX/var/lib/postgresql restart
+  liz_service_postgresql restart
 
   echo "PostgreSQL - clean packages"
   pkg remove -y build-essential
@@ -154,7 +154,7 @@ EOF
 
 function liz_service_postgresql() {
   echo "PostgreSQL - service $1"
-  pg_ctl -D $PREFIX/var/lib/postgresql $1
+  pg_ctl -D $PREFIX/var/lib/postgresql -l pg.log $1
 }
 
 function liz_ip() {
@@ -207,7 +207,7 @@ function liz_restore() {
 
   if [ -f $DATA ]; then
     echo "PostgreSQL - restart server"
-    pg_ctl -D $PREFIX/var/lib/postgresql restart
+    liz_service_postgresql restart
 
     echo "* Drop database gis"
     dropdb gis
