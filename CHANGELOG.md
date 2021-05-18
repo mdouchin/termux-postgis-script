@@ -2,6 +2,7 @@
 
 ### 1.0.4 - 18/05/2021
 
+* PostgreSQL - Log errors and warning in pg.log file instead of in command prompt
 * Synchronisation - add an option in the INI files to configure the frequency in minutes
 * Synchronsation - PostgreSQL: check LizSync has been installed before running sync
 
