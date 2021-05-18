@@ -43,15 +43,30 @@ then
 fi
 
 # Check if current minute of date corresponds to the repeat_minutes given in configuration
-current_minute=$(date '+%M')
-re='^[0-9]+$'
-if [[ $REPEAT =~ $re ]]
+current_minute=$(date '+%-M')
+REPEAT=$(($REPEAT + 0))
+if [ $REPEAT -gt 0 ]
 then
-    if [ "$(( current_minute % REPEAT ))" -eq 0 ]
+    modulo="$(( current_minute % REPEAT ))"
+    modulo=$(($modulo + 0))
+    if [ $modulo -gt 0 ]
     then
         echo "Current minute does not correspond to given repeat minutes"
         exit 0
     fi
+else
+    echo "Wrong value for repeat_minutes: $REPEAT"
+fi
+
+# Check schema lizsync exists
+PGTEST="SELECT count(*) FROM information_schema.tables WHERE table_schema = 'lizsync' AND table_name = 'logged_relations'"
+$DAEMON $PGCONNECTION -t -c "$PGTEST" -v "ON_ERROR_STOP=1" > sup
+PGCHECK=$(cat sup | sed 's/[^0-9]//g')
+rm sup
+if [ $PGCHECK = 0 ]
+then
+    echo "LizSync not installed. Nothing to do"
+    exit 0
 fi
 
 # config
@@ -63,6 +78,5 @@ DAEMON_OPTS="$PGCONNECTION -f $DIRECTORY/$CONFIGPG"
 # Run daemon
 echo "$NAME: $ACTION"
 ./run_daemon.sh $ACTION $NAME $DAEMON "$DAEMON_OPTS"
-
 
 exit 0

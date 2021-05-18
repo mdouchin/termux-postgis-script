@@ -45,15 +45,19 @@ then
 fi
 
 # Check if current minute of date corresponds to the repeat_minutes given in configuration
-current_minute=$(date '+%M')
-re='^[0-9]+$'
-if [[ $REPEAT =~ $re ]]
+current_minute=$(date '+%-M')
+REPEAT=$(($REPEAT + 0))
+if [ $REPEAT -gt 0 ]
 then
-    if [ "$(( current_minute % REPEAT ))" -eq 0 ]
+    modulo="$(( current_minute % REPEAT ))"
+    modulo=$(($modulo + 0))
+    if [ $modulo -gt 0 ]
     then
         echo "Current minute does not correspond to given repeat minutes"
         exit 0
     fi
+else
+    echo "Wrong value for repeat_minutes: $REPEAT"
 fi
 
 # Check media directory has changed
@@ -72,7 +76,7 @@ else
         DIRCHANGED=true
     fi
 fi
-echo $DIRSTAT > $STATFILE
+
 if [ "$DIRCHANGED" = false ] && [ "$ACTION" = "start" ]
 then
     echo "* No change detected in dir $FTPLOCA. Exit"
