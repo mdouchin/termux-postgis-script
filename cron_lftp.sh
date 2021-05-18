@@ -35,11 +35,25 @@ FTPPORT=$(sed -nr "/^\[lftp\]/ { :l /^port[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}
 FTPUSER=$(sed -nr "/^\[lftp\]/ { :l /^user[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $LFTPINI)
 FTPLOCA=$(sed -nr "/^\[lftp\]/ { :l /^local_dir[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $LFTPINI)
 FTPREMO=$(sed -nr "/^\[lftp\]/ { :l /^remote_dir[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $LFTPINI)
+REPEAT=$(sed -nr "/^\[lftp\]/ { :l /^repeat_minutes[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" $LFTPINI)
 
+# Check if sync is active
 if [ "$FTPACTIVE" != "true" ]
 then
     echo "Action is not active. Cancel."
     exit 0
+fi
+
+# Check if current minute of date corresponds to the repeat_minutes given in configuration
+current_minute=$(date '+%M')
+re='^[0-9]+$'
+if [[ $REPEAT =~ $re ]]
+then
+    if [ "$(( current_minute % REPEAT ))" -eq 0 ]
+    then
+        echo "Current minute does not correspond to given repeat minutes"
+        exit 0
+    fi
 fi
 
 # Check media directory has changed
@@ -73,7 +87,7 @@ echo "set ssl:verify-certificate no" > $DIRECTORY/$CONFIGFTP
 echo "set sftp:auto-confirm yes" >> $DIRECTORY/$CONFIGFTP
 echo "set ftp:ssl-allow false" >> $DIRECTORY/$CONFIGFTP
 echo "open $FTPPROT://$FTPUSER@$FTPHOST" >> $DIRECTORY/$CONFIGFTP
-echo "mirror -R --verbose --use-cache --ignore-time $FTPLOCA $FTPREMO" >> $DIRECTORY/$CONFIGFTP
+echo "mirror -R --verbose --use-cache --only-missing --ignore-time $FTPLOCA $FTPREMO" >> $DIRECTORY/$CONFIGFTP
 echo "quit" >> $DIRECTORY/$CONFIGFTP
 echo "bye" >> $DIRECTORY/$CONFIGFTP
 

@@ -223,45 +223,57 @@ The result of this command will be like:
 ```
 ~ $ crontab -l
 * * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron
-*/5 * * * * /data/data/com.termux/files/home/cron_postgresql.sh start
-*/5 * * * * /data/data/com.termux/files/home/cron_lftp.sh start
+* * * * * /data/data/com.termux/files/home/cron_postgresql.sh start
+* * * * * /data/data/com.termux/files/home/cron_lftp.sh start
 ```
 
-The first line is a test action executed every minute which writes the current date into the file `~/test_cron`. You can check it works by running
+The first line is a test action executed every minute which writes the current date into the file `~/test_cron`. You can check if it works by running
 
 ```bash
 ls -lh ~/test_cron
 ```
 
+which will show you a line with the creation date of the file `test_cron` generated every minute. It should be the last minute.
+
 Two other scripts will be run every 5 minutes. They can be used to run some FTP and PostgreSQL database synchronisation processes if the needed INI configuration files are found.
 
-If no file `~/test_cron` exists, you can test to reactivate the cron service with 
+If no file `~/test_cron` exists, you can test to reactivate the cron service with
 
 ```bash
 sv-enable crond
 ```
 
-NB: This command should be done on every start, since it is now included in the startup script.
+NB: This command is automatically done on every start of Termux, since it is now included in the startup script.
 
 #### FTP synchronisation with lftp
 
-The script `/data/data/com.termux/files/home/cron_lftp.sh` is in charge of running the **synchronisation of files** between a file directory of your Android device and a FTP server directory. The library **lftp** is used in mirror mode for this purpose. The cron checks every 5 minutes if the content of a chosen folder has changed, and runs the synchronisation. Only new of modified files are uploaded. Not deletion is made on the server side.
+The script `/data/data/com.termux/files/home/cron_lftp.sh` is in charge of running the **synchronisation of files** between a file directory of your Android device and a FTP server directory. The library **lftp** is used in mirror mode for this purpose. The cron checks every minute if the content of a chosen folder has changed and if the synchronisation must be done for this minute. If so, it launches the synchronisation. Only new of modified files are uploaded. **No deletion is made on the server side**.
 
-To enable it, you need to  edit the INI file `lftp.ini` and change the properties:
+To configure it, you need to edit the INI file `lftp.ini` and change the values of the properties. Open it with the command:
+
+```bash
+nano lftp.ini
+```
+
+which will show the content in a text editor:
 
 ```ìni
 [lftp]
-active=false
+active=true
+repeat_minutes=3
 protocol=ftp
-host=some-fake-ftp-domain.com
+host=your_ftp_server.com
 port=21
-user=your_ftp_username
+user=your_ftp_user
 local_dir=storage/downloads/qgis/media
-remote_dir=qgis/directory/media
+remote_dir=qgis/your_directory/media
 
 ```
 
-* **active** If set to `true`, the synchronisation is activated. Use `false` to deactivate file synchronisation
+The following properties can be changed:
+
+* **active** If set to `true` (default value), the synchronisation is activated. Use `false` to deactivate file synchronisation
+* **repeat_minutes** The value determines the number of **minutes** to wait between consecutive synchronisations. By default, a synchronisation is lanched every 3 minutes.
 * **protocol** Use `ftp` or `sftp`, depending on your FTP server
 * **host** The domain name or IP address of the FTP server
 * **port** The port. Usually `21` for FTP and `22` for SFTP
@@ -269,9 +281,49 @@ remote_dir=qgis/directory/media
 * **local_dir** The local directory of your Termux setup to synchronise. In the example above, all files and folders under your Android folder `Downloads/qgis/media` will be synchronized. The `storage/` root corresponds to your Android user folder, which usually contains DCIM, Downloads, Pictures, Videos
 * **remote_dir** The remote directory in your FTP server. Choose with care, as the synchronisation will modify its content
 
+Once you have edited the file, you can save the modification with `CTRL+O` and close the file with `CTRL+X`.
+
 The **password** needed to log in is not stored in this file, but needs to be written in the file `.netrc` of your Termux home folder. See the [netrc file documentation](https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html) for more information on the syntax.
+
+To edit this file `.netrc`, run the command
+
+```bash
+nano ~/.netrc
+```
+
+which will open a text editor and display the file content.
+
+```
+machine your_ftp_server.com login your_ftp_user password your_password
+```
+
+* Change the values to correspond to your FTP server credentials: `your_ftp_server.com`, `your_ftp_user` and `your_password` must be changed !
+* Save the file with `CTRL+O`
+* Quit the text editor with `CTRL+X`.
 
 #### PostgreSQL synchronisation with LizSync
 
-TODO
+You can open the INI file `postgresql.ini` to configure the LizSync PostgreSQL synchronization, if you have used your Termux database as a clone database. Open the configuration file with the command:
 
+```bash
+nano postgresql.ini
+```
+
+which will show the content in a text editor:
+
+```ìni
+[postgresql]
+active=true
+repeat_minutes=3
+connection=service=gis
+run_action=SELECT * FROM lizsync.synchronize()
+```
+
+The following properties can be changed:
+
+* **active** If set to `true` (default value), the synchronisation is activated. Use `false` to deactivate PostgreSQL synchronisation
+* **repeat_minutes** The value determines the number of **minutes** to wait between consecutive synchronisations. By default, a synchronisation is lanched every 3 minutes.
+
+**Do not change** the values for the `connection` and `run_action` parameters !
+
+Once you have edited the file, you can save the modification with `CTRL+O` and close the file with `CTRL+X`.

@@ -279,14 +279,15 @@ function liz_install_cron() {
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/cron_lftp.sh -O cron_lftp.sh
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/lftp.ini -O lftp.ini
   wget https://raw.githubusercontent.com/mdouchin/termux-postgis-script/main/run_daemon.sh -O run_daemon.sh
+  echo "machine your_ftp_server.com login your_ftp_user password your_password" > ~/.netrc
   chmod +x *.sh
   echo "* PostgreSQL and LFTP actions installed"
 
   # Activate crontab actions
   echo "Crontab - Add cron actions"
   echo '* * * * * echo "$(date)" > /data/data/com.termux/files/home/test_cron' > ~/crontab.txt
-  echo '*/5 * * * * /data/data/com.termux/files/home/cron_postgresql.sh start' >> ~/crontab.txt
-  echo '*/5 * * * * /data/data/com.termux/files/home/cron_lftp.sh start' >> ~/crontab.txt
+  echo '* * * * * /data/data/com.termux/files/home/cron_postgresql.sh start' >> ~/crontab.txt
+  echo '* * * * * /data/data/com.termux/files/home/cron_lftp.sh start' >> ~/crontab.txt
   crontab ~/crontab.txt
   rm ~/crontab.txt
   echo "* Crontab actions installed"
@@ -331,6 +332,7 @@ function liz_install() {
   liz_install_cron
 
   echo "########## INSTALLATION COMPLETED ###########"
+  echo "Please restart Termux: type the word exit then validate"
 
 }
 

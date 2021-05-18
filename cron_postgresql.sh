@@ -33,11 +33,25 @@ fi
 PGACTIVE=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*active[ \t]*=[ \t]*//p' $PGINI)
 PGCONNECTION=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*connection[ \t]*=[ \t]*//p' $PGINI)
 PGACTION=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*run_action[ \t]*=[ \t]*//p' $PGINI)
+REPEAT=$(sed -n '/^[ \t]*\[postgresql\]/,/\[/s/^[ \t]*repeat_minutes[ \t]*=[ \t]*//p' $PGINI)
 
+# Check if synchro is active
 if [ "$PGACTIVE" != "true" ]
 then
     echo "Action is not active. Cancel."
     exit 0
+fi
+
+# Check if current minute of date corresponds to the repeat_minutes given in configuration
+current_minute=$(date '+%M')
+re='^[0-9]+$'
+if [[ $REPEAT =~ $re ]]
+then
+    if [ "$(( current_minute % REPEAT ))" -eq 0 ]
+    then
+        echo "Current minute does not correspond to given repeat minutes"
+        exit 0
+    fi
 fi
 
 # config
