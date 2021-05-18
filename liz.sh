@@ -403,7 +403,7 @@ case $COMMAND in
     liz_startup
     ;;
   ve)
-    echo "Version: 1.0.3"
+    echo "Version: 1.0.4"
     ;;
   zz)
     liz_reset_all

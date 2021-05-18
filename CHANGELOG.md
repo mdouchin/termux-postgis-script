@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 1.0.4 - 18/05/2021
+
+* Synchronisation - add an option in the INI files to configure the frequency in minutes
+* Synchronsation - PostgreSQL: check LizSync has been installed before running sync
+
 ### 1.0.3 - 22/04/2021
 
 * PostgreSQL sync - remove useless check before running lizsync synchronize command
