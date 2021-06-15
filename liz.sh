@@ -97,15 +97,15 @@ function liz_install_postgresql() {
   pkg install -y build-essential wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal
 
   echo "PostgreSQL - install PostGIS"
-  wget https://download.osgeo.org/postgis/source/postgis-3.1.0.tar.gz
-  tar xfz postgis-3.1.0.tar.gz
-  cd postgis-3.1.0
+  wget https://download.osgeo.org/postgis/source/postgis-3.1.2.tar.gz
+  tar xfz postgis-3.1.2.tar.gz
+  cd postgis-3.1.2
   ./configure --prefix=$PREFIX --with-projdir=$PREFIX
   make -j8
   make install
   cd ~
-  rm postgis-3.1.0.tar.gz
-  rm -rf postgis-3.1.0/
+  rm postgis-3.1.2.tar.gz
+  rm -rf postgis-3.1.2/
 
   echo "PostgreSQL - configure"
   mkdir -p $PREFIX/var/lib/postgresql
@@ -403,7 +403,7 @@ case $COMMAND in
     liz_startup
     ;;
   ve)
-    echo "Version: 1.0.4"
+    echo "Version: 1.0.5"
     ;;
   zz)
     liz_reset_all

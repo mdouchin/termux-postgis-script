@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.0.5 - 15/06/2021
+
+* PostGIS - use version 3.1.2 to fix a bug when installing previous 3.1.0 with new Proj 8
+
 ### 1.0.4 - 18/05/2021
 
 * PostgreSQL - Log errors and warning in pg.log file instead of in command prompt
