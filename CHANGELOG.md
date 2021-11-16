@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.0.6 - 16/11/2021
+
+* PostGIS - use version 3.1.4 && install needed new packages binutils & zstd
+
 ### 1.0.5 - 15/06/2021
 
 * PostGIS - use version 3.1.2 to fix a bug when installing previous 3.1.0 with new Proj 8
