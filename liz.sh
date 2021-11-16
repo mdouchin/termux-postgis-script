@@ -88,51 +88,75 @@ function liz_install_postgresql() {
   echo "PostgreSQL - install and configure"
 
   if [ -f $PREFIX/bin/pg_ctl ]; then
-    echo "* PostgreSQL - package already installed"
+    echo "* PostgreSQL - the package is already installed"
     echo ""
-    return
-  fi
-
-  echo "PostgreSQL - install needed packages"
-  pkg install -y build-essential wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal
-
-  echo "PostgreSQL - install PostGIS"
-  wget https://download.osgeo.org/postgis/source/postgis-3.1.2.tar.gz
-  tar xfz postgis-3.1.2.tar.gz
-  cd postgis-3.1.2
-  ./configure --prefix=$PREFIX --with-projdir=$PREFIX
-  make -j8
-  make install
-  cd ~
-  rm postgis-3.1.2.tar.gz
-  rm -rf postgis-3.1.2/
-
-  echo "PostgreSQL - configure"
-  mkdir -p $PREFIX/var/lib/postgresql
-  initdb $PREFIX/var/lib/postgresql
-  echo "listen_addresses = '*'" >> $PREFIX/var/lib/postgresql/postgresql.conf
-  echo "host all all 0.0.0.0/0 md5" >> $PREFIX/var/lib/postgresql/pg_hba.conf
-
-  echo "PostgreSQL - start server"
-  liz_service_postgresql start
-
-  echo "PostgreSQL - create database gis"
-  createdb gis
-  psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;CREATE EXTENSION IF NOT EXISTS hstore;"
-
-  echo "PostgreSQL - create the user 'gis'"
-  GIVENPASS=$1
-  if [ ${#GIVENPASS} -gt 0 ]
-  then
-    PASSWORD=$GIVENPASS
-    echo "Password taken from the given parameter of liz_install"
   else
-    echo "####################"
-    echo -n "Please type a password for the user gis: "
-    read -s PASSWORD
-  fi
-  psql -d gis -c "CREATE ROLE gis WITH SUPERUSER LOGIN PASSWORD '$PASSWORD'"
+    echo "* PostgreSQL - install the needed packages"
+    pkg install -y build-essential wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal binutils zstd zstd-static
 
+    echo "PostgreSQL - configure"
+    mkdir -p $PREFIX/var/lib/postgresql
+    initdb $PREFIX/var/lib/postgresql
+    echo "listen_addresses = '*'" >> $PREFIX/var/lib/postgresql/postgresql.conf
+    echo "host all all 0.0.0.0/0 md5" >> $PREFIX/var/lib/postgresql/pg_hba.conf
+
+    echo "PostgreSQL - start server"
+    liz_service_postgresql start
+  fi
+
+  POSTGIS_INSTALLED=false
+  if psql service=gis -c "select postgis_version()"; then
+    echo "* PostgreSQL - PostGIS already installed"
+    POSTGIS_INSTALLED=true
+  else
+    echo "PostgreSQL - install PostGIS"
+    wget https://download.osgeo.org/postgis/source/postgis-3.1.4.tar.gz
+    tar xfz postgis-3.1.4.tar.gz
+    cd postgis-3.1.4
+    ./configure --prefix=$PREFIX --with-projdir=$PREFIX
+    make -j8
+    if make install; then
+      POSTGIS_INSTALLED=true
+    fi
+    cd ~
+    rm postgis-3.1.4.tar.gz
+    rm -rf postgis-3.1.4/
+  fi
+
+  # Create the database
+  echo "PostgreSQL - create database gis"
+  if createdb gis; then
+    echo "* The database gis has been created"
+  else
+    echo "* ERROR: The database gis already exists"
+  fi
+
+  if [ "$POSTGIS_INSTALLED" = true ]
+  then
+    psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;CREATE EXTENSION IF NOT EXISTS hstore;"
+  else
+    echo "* ERROR: PostGIS has not been correctly installed"
+  fi
+
+  # Create the gis PostgreSQL role
+  if psql -d gis -c "\du gis"; then
+    echo "* ERROR: PostgreSQL - the role gis already exists"
+  else
+    echo "* PostgreSQL - create the user 'gis'"
+    GIVENPASS=$1
+    if [ ${#GIVENPASS} -gt 0 ]
+    then
+      PASSWORD=$GIVENPASS
+      echo "Password taken from the given parameter of liz_install"
+    else
+      echo "####################"
+      echo -n "Please type a password for the user gis: "
+      read -s PASSWORD
+    fi
+    psql -d gis -c "CREATE ROLE gis WITH SUPERUSER LOGIN PASSWORD '$PASSWORD'"
+  fi
+
+  # Create the service file
   echo "PostgreSQL - create service file"
   cat > .pg_service.conf <<EOF
 [gis]
@@ -144,6 +168,7 @@ password=gis
 EOF
   sed -i "s/gispassword/$PASSWORD/g" .pg_service.conf
 
+  # Finalize
   echo "PostgreSQL - restart server"
   liz_service_postgresql restart
 
@@ -403,7 +428,7 @@ case $COMMAND in
     liz_startup
     ;;
   ve)
-    echo "Version: 1.0.5"
+    echo "Version: 1.0.6"
     ;;
   zz)
     liz_reset_all
