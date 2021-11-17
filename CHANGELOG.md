@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.0.7 - 17/11/2021
+
+* PostgreSQL - Fix bug while creating the gis user.
+
 ### 1.0.6 - 16/11/2021
 
 * PostGIS - use version 3.1.4 && install needed new packages binutils & zstd

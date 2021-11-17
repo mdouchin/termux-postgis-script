@@ -138,33 +138,35 @@ function liz_install_postgresql() {
     echo "* ERROR: PostGIS has not been correctly installed"
   fi
 
-  # Create the gis PostgreSQL role
-  if psql -d gis -c "\du gis"; then
-    echo "* ERROR: PostgreSQL - the role gis already exists"
+  # Get the password
+  GIVENPASS=$1
+  if [ ${#GIVENPASS} -gt 0 ]
+  then
+    PASSWORD=$GIVENPASS
+    echo "Password taken from the given parameter of liz_install"
   else
-    echo "* PostgreSQL - create the user 'gis'"
-    GIVENPASS=$1
-    if [ ${#GIVENPASS} -gt 0 ]
-    then
-      PASSWORD=$GIVENPASS
-      echo "Password taken from the given parameter of liz_install"
-    else
-      echo "####################"
-      echo -n "Please type a password for the user gis: "
-      read -s PASSWORD
-    fi
-    psql -d gis -c "CREATE ROLE gis WITH SUPERUSER LOGIN PASSWORD '$PASSWORD'"
+    echo "####################"
+    echo -n "Please type a password for the user gis: "
+    read -s PASSWORD
+  fi
+
+  # Create the gis PostgreSQL role
+  echo "* PostgreSQL - create the user 'gis'"
+  if psql -d gis -c "CREATE ROLE gis WITH SUPERUSER LOGIN PASSWORD '$PASSWORD'"; then
+    echo "* PostgreSQL: the role gis has been successfully created"
+  else
+    echo "* ERROR - The PostgreSQL gis role has not been created"
   fi
 
   # Create the service file
-  echo "PostgreSQL - create service file"
+  echo "PostgreSQL - create the service file"
   cat > .pg_service.conf <<EOF
 [gis]
 host=localhost
 dbname=gis
-user=gispassword
+user=gis
 port=5432
-password=gis
+password=gispassword
 EOF
   sed -i "s/gispassword/$PASSWORD/g" .pg_service.conf
 
@@ -428,7 +430,7 @@ case $COMMAND in
     liz_startup
     ;;
   ve)
-    echo "Version: 1.0.6"
+    echo "Version: 1.0.7"
     ;;
   zz)
     liz_reset_all
