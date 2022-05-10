@@ -329,6 +329,9 @@ function liz_install_cron() {
 function liz_instal_lftp() {
   echo "LFTP - Install package"
   pkg install -y lftp
+
+  # Create directory if it does not exists
+  mkdir -p storage/shared/Android/data/ch.opengis.qfield/files/QField/qgis/media
   if [ -f $PREFIX/bin/lftp ]; then
     echo "* LFTP - package already installed"
     echo ""
@@ -434,7 +437,7 @@ case $COMMAND in
     liz_startup
     ;;
   ve)
-    echo "Version: 1.0.7"
+    echo "Version: 1.1.0"
     ;;
   zz)
     liz_reset_all
