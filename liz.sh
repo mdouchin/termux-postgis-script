@@ -76,11 +76,19 @@ function liz_storage() {
 
 function liz_update() {
   echo "Update - upgrade packages"
+  # apt update
+  # apt upgrade -y
   pkg update -y
   pkg upgrade -y
   pkg autoclean
   echo ""
   echo ""
+}
+
+function liz_install_common_tools() {
+  echo "Tools - Install useful packages"
+  pkg install -y iproute2 nano wget curl readline
+
 }
 
 function liz_install_postgresql() {
@@ -92,7 +100,8 @@ function liz_install_postgresql() {
     echo ""
   else
     echo "* PostgreSQL - install the needed packages"
-    pkg install -y build-essential wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal binutils zstd zstd-static
+    # pkg install -y build-essential wget curl readline libiconv postgresql libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal binutils zstd zstd-static
+    pkg install -y postgresql postgis libiconv libxml2 libsqlite proj libgeos json-c libprotobuf-c gdal zstd zstd-static
 
     echo "PostgreSQL - configure"
     mkdir -p $PREFIX/var/lib/postgresql
@@ -101,26 +110,8 @@ function liz_install_postgresql() {
     echo "host all all 0.0.0.0/0 md5" >> $PREFIX/var/lib/postgresql/pg_hba.conf
 
     echo "PostgreSQL - start server"
+    echo ""
     liz_service_postgresql start
-  fi
-
-  POSTGIS_INSTALLED=false
-  if psql service=gis -c "select postgis_version()"; then
-    echo "* PostgreSQL - PostGIS already installed"
-    POSTGIS_INSTALLED=true
-  else
-    echo "PostgreSQL - install PostGIS"
-    wget https://download.osgeo.org/postgis/source/postgis-3.1.4.tar.gz
-    tar xfz postgis-3.1.4.tar.gz
-    cd postgis-3.1.4
-    ./configure --prefix=$PREFIX --with-projdir=$PREFIX
-    make -j8
-    if make install; then
-      POSTGIS_INSTALLED=true
-    fi
-    cd ~
-    rm postgis-3.1.4.tar.gz
-    rm -rf postgis-3.1.4/
   fi
 
   # Create the database
@@ -129,13 +120,6 @@ function liz_install_postgresql() {
     echo "* The database gis has been created"
   else
     echo "* ERROR: The database gis already exists"
-  fi
-
-  if [ "$POSTGIS_INSTALLED" = true ]
-  then
-    psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;CREATE EXTENSION IF NOT EXISTS hstore;"
-  else
-    echo "* ERROR: PostGIS has not been correctly installed"
   fi
 
   # Get the password
@@ -173,6 +157,23 @@ EOF
   # Finalize
   echo "PostgreSQL - restart server"
   liz_service_postgresql restart
+
+  # Check if postgis is installed
+  POSTGIS_INSTALLED_IN_DB=false
+  if psql service=gis -c "select postgis_version()"; then
+    echo "* PostgreSQL - PostGIS already installed in database"
+    POSTGIS_INSTALLED_IN_DB=true
+  else
+    echo "PostgreSQL - PostGIS not yet install in database"
+    pkg install -y postgis
+  fi
+
+  if [ "$POSTGIS_INSTALLED_IN_DB" = true ]
+  then
+    psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;CREATE EXTENSION IF NOT EXISTS hstore;"
+  else
+    echo "* ERROR: PostGIS has not been correctly installed"
+  fi
 
   echo "PostgreSQL - clean packages"
   pkg remove -y build-essential
@@ -339,6 +340,9 @@ function liz_install() {
 
   # Update packages
   liz_update
+
+  # Install common tools
+  liz_install_common_tools
 
   # Install PostgreSQL
   liz_install_postgresql $1
