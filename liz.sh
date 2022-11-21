@@ -159,20 +159,18 @@ EOF
   liz_service_postgresql restart
 
   # Check if postgis is installed
-  POSTGIS_INSTALLED_IN_DB=false
+  POSTGIS_INSTALLED_IN_DB="false"
   if psql service=gis -c "select postgis_version()"; then
     echo "* PostgreSQL - PostGIS already installed in database"
-    POSTGIS_INSTALLED_IN_DB=true
+    POSTGIS_INSTALLED_IN_DB="true"
   else
     echo "PostgreSQL - PostGIS not yet install in database"
     pkg install -y postgis
   fi
 
-  if [ "$POSTGIS_INSTALLED_IN_DB" = true ]
+  if [ "$POSTGIS_INSTALLED_IN_DB" = "false" ]
   then
     psql -d gis -c "CREATE EXTENSION IF NOT EXISTS postgis;CREATE EXTENSION IF NOT EXISTS hstore;"
-  else
-    echo "* ERROR: PostGIS has not been correctly installed"
   fi
 
   echo "PostgreSQL - clean packages"
@@ -437,7 +435,7 @@ case $COMMAND in
     liz_startup
     ;;
   ve)
-    echo "Version: 1.1.0"
+    echo "Version: 1.1.1"
     ;;
   zz)
     liz_reset_all

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 1.1.1 - 21/11/2022
+
+* PostGIS - Fix bug while installing PostGIS inside the gis database
+
 ### 1.1.0 - 10/05/2022
 
 * PostGIS - Install from package and not from source (reduce installation time).
